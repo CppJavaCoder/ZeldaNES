@@ -1,0 +1,29 @@
+{
+  "ModLoader64": {
+    "rom": "Zelda.nes",
+    "patch": "",
+    "isServer": true,
+    "isClient": true,
+    "supportedConsoles": [
+      "N64",
+      "NES"
+    ],
+    "selectedConsole": "NES",
+    "coreOverride": "ZeldaNES",
+    "disableVIUpdates": false
+  },
+  "NetworkEngine.Client": {
+    "isSinglePlayer": false,
+    "forceServerOverride": false,
+    "ip": "127.0.0.1",
+    "port": 8082,
+    "lobby": "factor-disloyal-53",
+    "nickname": "Player",
+    "password": ""
+  },
+  "NetworkEngine.Server": {
+    "port": 8082,
+    "udpPort": 8082,
+    "patchSizeLimitMB": 10
+  }
+}
