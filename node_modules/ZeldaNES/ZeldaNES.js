@@ -28,8 +28,10 @@ class ZeldaNES {
     }
     postinit() {
         this.global = new Imports_1.GlobalContext(this.ModLoader);
+        this.log = this.ModLoader.logger;
     }
     onTick() {
+        this.log.info("OnTick");
     }
     onPostTick() {
     }

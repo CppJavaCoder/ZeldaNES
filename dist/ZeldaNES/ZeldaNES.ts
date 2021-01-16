@@ -18,6 +18,7 @@ export class ZeldaNES implements ICore, API.ZeldaCore {
     ModLoader: IModLoaderAPI = {} as IModLoaderAPI;
     eventTicks: Map<string, Function> = new Map<string, Function>();
     global!: API.IGlobalContext;
+    log!: ILogger;
 	
 	constructor() {
     }
@@ -45,14 +46,14 @@ export class ZeldaNES implements ICore, API.ZeldaCore {
     @Postinit()
     postinit(): void {
         this.global = new GlobalContext(this.ModLoader);
-
+        this.log = this.ModLoader.logger;
         
 
     }
 
     @onTick()
     onTick() {
-
+        this.log.info("OnTick");
     }
     
     @onPostTick()

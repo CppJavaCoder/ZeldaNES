@@ -4,5 +4,6 @@ export interface IGlobalContext {
 }
 
 export interface ZeldaCore extends ICore {
+    global: IGlobalContext;
 
 }
