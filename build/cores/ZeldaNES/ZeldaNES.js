@@ -31,7 +31,7 @@ class ZeldaNES {
         this.log = this.ModLoader.logger;
     }
     onTick() {
-        this.log.info("OnTick");
+        //this.log.info("OnTick");
     }
     onPostTick() {
     }
