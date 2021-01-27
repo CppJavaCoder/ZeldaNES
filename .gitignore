@@ -14,6 +14,13 @@ build/cores/ZeldaNES/src/CommandBuffer.ts
 build/cores/ZeldaNES/src/Imports.js
 build/cores/ZeldaNES/src/Imports.js.map
 build/cores/ZeldaNES/src/Imports.ts
+
+build/
+dist/
+libs/
+node_modules/
+API/
+
 dist/ZeldaNES.pak
 dist/ZeldaNES/ZeldaNES.js
 dist/ZeldaNES/ZeldaNES.js.map
@@ -63,3 +70,12 @@ node_modules/ZeldaNES/src/CommandBuffer.ts
 node_modules/ZeldaNES/src/Imports.js
 node_modules/ZeldaNES/src/Imports.js.map
 node_modules/ZeldaNES/src/Imports.ts
+node_modules/ZeldaNES/ZeldaNES.js
+node_modules/ZeldaNES/ZeldaNES.js.map
+node_modules/ZeldaNES/ZeldaNES.ts
+libs/ZeldaNES/ZeldaNES.js
+libs/ZeldaNES/ZeldaNES.js.map
+libs/ZeldaNES/ZeldaNES.ts
+build/cores/ZeldaNES/ZeldaNES.js
+build/cores/ZeldaNES/ZeldaNES.js.map
+build/cores/ZeldaNES/ZeldaNES.ts
