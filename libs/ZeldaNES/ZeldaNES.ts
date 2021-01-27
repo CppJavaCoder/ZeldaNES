@@ -13,7 +13,7 @@ import * as CORE from './src/Imports';
 import { GlobalContext } from "./src/Imports";
 
 export class ZeldaNES implements ICore, API.ZeldaCore {
-    header = "NZS";
+    header = "NES";
     @ModLoaderAPIInject()
     ModLoader: IModLoaderAPI = {} as IModLoaderAPI;
     eventTicks: Map<string, Function> = new Map<string, Function>();

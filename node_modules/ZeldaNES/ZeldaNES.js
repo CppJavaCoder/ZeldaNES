@@ -14,7 +14,7 @@ const EventHandler_1 = require("modloader64_api/EventHandler");
 const Imports_1 = require("./src/Imports");
 class ZeldaNES {
     constructor() {
-        this.header = "NZS";
+        this.header = "NES";
         this.ModLoader = {};
         this.eventTicks = new Map();
         this.once = true;
