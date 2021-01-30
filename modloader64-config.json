@@ -10,7 +10,8 @@
     ],
     "selectedConsole": "NES",
     "coreOverride": "ZeldaNES",
-    "disableVIUpdates": false
+    "disableVIUpdates": false,
+    "retroDLL": "nestopia_libretro"
   },
   "NetworkEngine.Client": {
     "isSinglePlayer": false,

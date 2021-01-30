@@ -1,3 +1,4 @@
 export * from './ZeldaAPI'
 export * from './ILink'
-export * from './IVariable'
+export * from './ISprite'
+export * from './IInventory'

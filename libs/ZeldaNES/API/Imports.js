@@ -12,5 +12,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./ZeldaAPI"), exports);
 __exportStar(require("./ILink"), exports);
-__exportStar(require("./IVariable"), exports);
+__exportStar(require("./ISprite"), exports);
+__exportStar(require("./IInventory"), exports);
 //# sourceMappingURL=Imports.js.map

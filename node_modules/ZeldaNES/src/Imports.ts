@@ -1,3 +1,4 @@
 export * from './Link';
 export * from './GlobalContext';
-export * from './Variable';
+export * from './Sprite';
+export * from './Inventory';
