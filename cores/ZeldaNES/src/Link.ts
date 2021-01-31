@@ -133,7 +133,7 @@ export class Link extends JSONTemplate implements API.ILink {
             this.setypos = this.ypos;
         }
 
-        if(this.inOverworld || this.rdramRead8(addresses.INBASEMENT) == 0x40 || this.rdramRead8(addresses.INOVERWORLD) == 0x40)
+        if(this.rdramRead8(addresses.FRAME) == 0x78 || this.inOverworld || this.rdramRead8(addresses.INBASEMENT) == 0x40 || this.rdramRead8(addresses.INOVERWORLD) == 0x40)
             this.fixedClip = false;
         else
             this.fixedClip = true;
