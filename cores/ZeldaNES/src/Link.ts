@@ -29,6 +29,9 @@ export class Link extends JSONTemplate implements API.ILink {
     blinker: number;
     stateChanged: boolean;
     state: number;
+    worldPos: number;
+
+    tunicColor: API.TunicColors;
 
     constructor(emulator: IMemory) {
         super();
@@ -50,6 +53,19 @@ export class Link extends JSONTemplate implements API.ILink {
         this.blinker = 0;
         this.state = 0;
         this.stateChanged = false;
+        this.worldPos = 0;
+        this.tunicColor = API.TunicColors.Green;
+    }
+
+    getWorldPos(): number {
+        return this.worldPos;
+    }
+    getInOverworld(): boolean {
+        return this.inOverworld;
+    }
+
+    getTunicColor(): API.TunicColors {
+        return this.tunicColor;
     }
 
     update(): void {
@@ -61,7 +77,7 @@ export class Link extends JSONTemplate implements API.ILink {
             this.sprite.showSprite(false);
             return;
         }
-        this.inventory.update();
+        this.inventory.refreshValues();
         this.tunicUpdate();
 
         this.frameUpdate();
@@ -81,6 +97,7 @@ export class Link extends JSONTemplate implements API.ILink {
         this.blinker = this.rdramRead8(addresses.BLINKTIMER);
         if(this.rdramRead8(addresses.DEATHTIMER) >= 0x7B)
         {
+            this.tunicColor = API.TunicColors.Death;
             this.sprite.replaceColor(248,240,200,128,128,128);
             this.sprite.replaceColor(0,0,0,64,64,64);
             this.sprite.replaceColor(56,224,128,96,96,96);
@@ -93,25 +110,37 @@ export class Link extends JSONTemplate implements API.ILink {
             this.sprite.replaceColor(248,240,200,248,240,200);
             this.sprite.replaceColor(0,0,0,0,0,0);
             if(this.tunicCol == API.TunicCol.Blue)
+            {
                 this.sprite.replaceColor(56,224,128,128,56,244);
+                this.tunicColor = API.TunicColors.Blue;
+            }
             else if(this.tunicCol == API.TunicCol.Red)
+            {
                 this.sprite.replaceColor(56,224,128,244,56,128);
+                this.tunicColor = API.TunicColors.Red;
+            }
             else
+            {
+                this.tunicColor = API.TunicColors.Green;
                 this.sprite.replaceColor(56,224,128,56,224,128);
+            }
             if(this.blinker > 0)
             {
                 switch(((this.rdramRead8(addresses.BLINKTIMER)-1)/2) % 4)
                 {
                     case 0:
+                        this.tunicColor = API.TunicColors.InjuredA;
                         this.sprite.replaceColor(56,224,128,1,1,1);
                         this.sprite.replaceColor(248,240,200,128,0,0);
                         this.sprite.replaceColor(0,0,0,0,0,128);
                     break;
                     case 1:
+                        this.tunicColor = API.TunicColors.InjuredB;
                         this.sprite.replaceColor(56,224,128,224,128,56);
                         this.sprite.replaceColor(0,0,0,255,255,255);
                     break;
                     case 2:
+                        this.tunicColor = API.TunicColors.InjuredC;
                         this.sprite.replaceColor(56,224,128,56,128,224);
                         this.sprite.replaceColor(0,0,0,255,255,255);
                     break;
@@ -133,7 +162,7 @@ export class Link extends JSONTemplate implements API.ILink {
             this.setypos = this.ypos;
         }
 
-        if(this.rdramRead8(addresses.FRAME) == 0x78 || this.inOverworld || this.rdramRead8(addresses.INBASEMENT) == 0x40 || this.rdramRead8(addresses.INOVERWORLD) == 0x40)
+        if(this.rdramRead8(addresses.LINK_FRAME) == 0x78 || this.inOverworld || this.rdramRead8(addresses.INBASEMENT) == 0x40 || this.rdramRead8(addresses.INOVERWORLD) == 0x40)
             this.fixedClip = false;
         else
             this.fixedClip = true;
@@ -168,8 +197,8 @@ export class Link extends JSONTemplate implements API.ILink {
         if(this.rdramRead8(0x00248) == 0xFF)
             return false;
         
-        this.xpos = this.rdramRead8(addresses.XPOSITION)
-        this.ypos = this.rdramRead8(addresses.YPOSITION) - 8;
+        this.xpos = this.rdramRead8(addresses.LINK_X)
+        this.ypos = this.rdramRead8(addresses.LINK_Y) - 8;
 
         if(this.xpos != this.sprite.xpos || this.ypos != this.sprite.ypos)
         {
@@ -206,9 +235,9 @@ export class Link extends JSONTemplate implements API.ILink {
     }
 
     frameUpdate(): boolean {
-        if(this.rdramRead8(addresses.FRAME) == 0xFF)
+        if(this.rdramRead8(addresses.LINK_FRAME) == 0xFF)
             return false;
-        this.frame = this.rdramRead8(addresses.FRAME);
+        this.frame = this.rdramRead8(addresses.LINK_FRAME);
         let sprFrame: number = 0;
         switch(this.frame)
         {

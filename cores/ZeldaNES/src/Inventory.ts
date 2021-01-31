@@ -83,10 +83,6 @@ export class Inventory extends JSONTemplate implements IInventory
         this.tunicCol = TunicCol.Green;
     }
 
-    update(): void {
-        this.refreshValues();
-    }
-
     refreshValues(): void {
         this.arrow = this.rdramRead8(addresses.INV_ARROW);
         this.bombBag = this.rdramRead8(addresses.INV_MAXBOMB);
@@ -135,6 +131,39 @@ export class Inventory extends JSONTemplate implements IInventory
                 this.tunicCol = TunicCol.Red;
             break;
         }
+    }
+    rewriteValues(): void {
+        this.rdramWrite8(addresses.INV_ARROW, this.arrow);
+        this.rdramWrite8(addresses.INV_MAXBOMB, this.bombBag);
+        this.rdramWrite8(addresses.INV_BOMBS, this.bombs);
+        this.rdramWrite8(addresses.INV_CANDLE, this.candle);
+        this.rdramWrite8(addresses.INV_COMPASS, this.compass);
+        this.rdramWrite8(addresses.INV_HEARTS, (this.containers << 4) + this.hearts);
+
+        this.rdramWrite8(addresses.INV_MGCBOOK, this.hasBook ? 1 : 0);
+        this.rdramWrite8(addresses.INV_BOOM, this.hasBoom ? 1 : 0);
+        this.rdramWrite8(addresses.INV_BOW, this.hasBow ? 1 : 0);
+        this.rdramWrite8(addresses.INV_FOOD, this.hasFood ? 1 : 0);
+        this.rdramWrite8(addresses.INV_MGCKEY, this.hasKey ? 1 : 0);
+        this.rdramWrite8(addresses.INV_CMPLVL9, this.hasL9comp ? 1 : 0);
+        this.rdramWrite8(addresses.INV_MAPLVL9, this.hasL9map ? 1 : 0);
+        this.rdramWrite8(addresses.INV_LADDER, this.hasLadder ? 1 : 0);
+        this.rdramWrite8(addresses.INV_MGCBOOM, this.hasMagicBoom ? 1 : 0);
+        this.rdramWrite8(addresses.INV_MGCSHLD, this.hasMagicShield ? 1 : 0);
+        this.rdramWrite8(addresses.INV_POWER, this.hasPower ? 1 : 0);
+        this.rdramWrite8(addresses.INV_RAFT, this.hasRaft ? 1 : 0);
+        this.rdramWrite8(addresses.INV_MAGICRD, this.hasRod ? 1 : 0);
+        this.rdramWrite8(addresses.INV_WHISTLE, this.hasWhistle ? 1 : 0);
+
+        this.rdramWrite8(addresses.INV_KEYS, this.keys);
+        this.rdramWrite8(addresses.INV_LETTER, this.letter);
+        this.rdramWrite8(addresses.INV_MAP, this.map);
+        this.rdramWrite8(addresses.INV_PARTHRT, this.pHeart);
+        this.rdramWrite8(addresses.INV_POTION, this.potion);
+        this.rdramWrite8(addresses.INV_MGCRING, this.ring);
+        this.rdramWrite8(addresses.INV_RUPEES, this.rupees);
+        this.rdramWrite8(addresses.INV_SWORD, this.sword);
+        this.rdramWrite8(addresses.INV_TRIFORCE, this.triforces);
     }
 
     bitCount8(value: number): number {

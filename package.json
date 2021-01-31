@@ -11,9 +11,12 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/CppJavaCoder/ZeldaNES.git"
   },
-  "homepage": "",
+  "bugs": {
+    "url": "git+https://github.com/CppJavaCoder/ZeldaNES/issues"
+  },
+  "homepage": "https://github.com/CppJavaCoder/ZeldaNES#readme",
   "dependencies": {},
   "devDependencies": {}
 }
