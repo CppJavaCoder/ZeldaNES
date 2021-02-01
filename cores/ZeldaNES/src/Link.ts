@@ -84,7 +84,10 @@ export class Link extends JSONTemplate implements API.ILink {
 
         this.updatedVisibility = this.visibleUpdate();
 
-        this.posUpdate();
+        if(this.posUpdate())
+        {
+            this.worldPos = this.rdramRead8(addresses.WORLD_POS);
+        }
         this.clipUpdate();
         //Move link off of the screen so we can draw our own
         this.clearPositionData();

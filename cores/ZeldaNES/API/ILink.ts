@@ -20,6 +20,7 @@ export enum addresses
     TUNIC_COL   = 0x6804,// 0x29 = green, 0x32 = blue, 0x16 = red
     HEARTS      = 0x0670,
     DEATHTIMER  = 0x0618,// >= 0x7B Link uses a grey palette
+    WORLD_POS   = 0x00EB,// 0x$% where $ is the Y and % is the X
     //These are pretty self explanitory, but might as well write out the details
     INV_SWORD   = 0x0657,// 0x00 = None, 0x01 = Normal, 0x02 = White, 0x03 = Magical sword 
     INV_BOMBS   = 0x0658,// Number of bombs
