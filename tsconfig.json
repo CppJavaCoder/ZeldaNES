@@ -16,8 +16,8 @@
       "@sound/*": [
         "./build/emulator/*"
       ],
-      "@ZeldaNES/*": [
-        "./src/ZeldaNES/*"
+      "ZeldaNES/*": [
+        "./cores/ZeldaNES/*"
       ]
     }
   },
