@@ -11,6 +11,7 @@ import path from 'path';
 import * as API from './API/Imports';
 import * as CORE from './src/Imports';
 import { GlobalContext } from "./src/Imports";
+import { ILink } from "./API/Imports";
 
 export class ZeldaNES implements ICore, API.ZeldaCore {
     header = "NES";
@@ -30,42 +31,44 @@ export class ZeldaNES implements ICore, API.ZeldaCore {
 
     @Preinit()
     preinit() {
-
+        this.log = this.ModLoader.logger;
+        this.log.info("Preinit");
     }
     
     @EventHandler(ModLoaderEvents.ON_SOFT_RESET_PRE)
     onReset1(evt: any) {
-
+        this.log.info("Reset pre");
     }
 
     @EventHandler(ModLoaderEvents.ON_SOFT_RESET_POST)
     onReset2(evt: any) {
-
+        this.log.info("Reset post");
     }
     
     @Init()
     init(): void {
-
+        this.log.info("Init");
     }
 
     @Postinit()
     postinit(): void {
-        if(!this.once)
+        this.log.info("Postinit");
+        if(!this.once && this.link == null as unknown as ILink)
             return;
         else
             this.once = false;
         this.global = new GlobalContext(this.ModLoader);
         this.link = new CORE.Link(this.ModLoader.emulator);
-        this.log = this.ModLoader.logger;
     }
 
     @onTick()
     onTick() {
+        this.log.info("onTick");
         this.link.update();
     }
     
     @onPostTick()
     onPostTick() {
-
+        this.log.info("onPostTick");
     }
 }

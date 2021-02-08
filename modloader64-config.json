@@ -1,6 +1,6 @@
 {
   "ModLoader64": {
-    "rom": "Zelda.nes",
+    "rom": "ZeldaRandom.nes",
     "patch": "",
     "isServer": true,
     "isClient": true,
