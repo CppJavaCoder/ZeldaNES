@@ -83,28 +83,109 @@ export class Inventory extends JSONTemplate implements IInventory
         this.tunicCol = TunicCol.Green;
     }
 
-    refreshValues(): void {
-        this.arrow = this.rdramRead8(addresses.INV_ARROW);
-        this.bombBag = this.rdramRead8(addresses.INV_MAXBOMB);
-        this.bombs = this.rdramRead8(addresses.INV_BOMBS);
-        this.candle = this.rdramRead8(addresses.INV_CANDLE);
-        this.compass = this.rdramRead8(addresses.INV_COMPASS);
-        this.containers = (this.rdramRead8(addresses.INV_HEARTS) | 0xF0) >> 4;
+    refreshValues(): boolean {
+        let thing: number = 0;
+        let changed: boolean = false;
 
+        thing = this.arrow;
+        this.arrow = this.rdramRead8(addresses.INV_ARROW);
+        if(thing != this.arrow)
+            changed = true;
+
+        thing = this.bombBag;
+        this.bombBag = this.rdramRead8(addresses.INV_MAXBOMB);
+        if(thing != this.bombBag)
+            changed = true;
+
+        thing = this.bombs;
+        this.bombs = this.rdramRead8(addresses.INV_BOMBS);
+        if(thing != this.bombs)
+            changed = true;
+
+        thing = this.candle;
+        this.candle = this.rdramRead8(addresses.INV_CANDLE);
+        if(thing != this.candle)
+            changed = true;
+
+        thing = this.compass;
+        this.compass = this.rdramRead8(addresses.INV_COMPASS);
+        if(thing != this.compass)
+            changed = true;
+
+        thing = this.containers;
+        this.containers = (this.rdramRead8(addresses.INV_HEARTS) | 0xF0) >> 4;
+        if(thing != this.containers)
+            changed = true;
+
+        thing = this.hasBook ? 1 : 0;
         this.hasBook = this.rdramRead8(addresses.INV_MGCBOOK) != 0x00;
+        if(thing != (this.hasBook ? 1 : 0))
+            changed = true;
+
+        thing = this.hasBoom ? 1 : 0;
         this.hasBoom = this.rdramRead8(addresses.INV_BOOM) != 0x00;
+        if(thing != (this.hasBoom ? 1 : 0))
+            changed = true;
+
+        thing = this.hasBow ? 1 : 0;
         this.hasBow = this.rdramRead8(addresses.INV_BOW) != 0x00;
-        this.hasFood = this.rdramRead8(addresses.INV_FOOD) != 0x00;
+        if(thing != (this.hasBow ? 1 : 0))
+            changed = true;
+
+        thing = this.hasKey ? 1 : 0;
         this.hasKey = this.rdramRead8(addresses.INV_MGCKEY) != 0x00;
+        if(thing != (this.hasKey ? 1 : 0))
+            changed = true;
+
+        thing = this.hasFood ? 1 : 0;
+        this.hasFood = this.rdramRead8(addresses.INV_FOOD) != 0x00;
+        if(thing != (this.hasFood ? 1 : 0))
+            changed = true;
+
+        thing = this.hasL9comp ? 1 : 0;
         this.hasL9comp = this.rdramRead8(addresses.INV_CMPLVL9) != 0x00;
+        if(thing != (this.hasL9comp ? 1 : 0))
+            changed = true;
+
+        thing = this.hasL9map ? 1 : 0;
         this.hasL9map = this.rdramRead8(addresses.INV_MAPLVL9) != 0x00;
+        if(thing != (this.hasL9map ? 1 : 0))
+            changed = true;
+
+        thing = this.hasLadder ? 1 : 0;
         this.hasLadder = this.rdramRead8(addresses.INV_LADDER) != 0x00;
+        if(thing != (this.hasLadder ? 1 : 0))
+            changed = true;
+
+        thing = this.hasMagicBoom ? 1 : 0;
         this.hasMagicBoom = this.rdramRead8(addresses.INV_MGCBOOM) != 0x00;
+        if(thing != (this.hasMagicBoom ? 1 : 0))
+            changed = true;
+
+        thing = this.hasMagicShield ? 1 : 0;
         this.hasMagicShield = this.rdramRead8(addresses.INV_MGCSHLD) != 0x00;
+        if(thing != (this.hasMagicShield ? 1 : 0))
+            changed = true;
+
+        thing = this.hasPower ? 1 : 0;
         this.hasPower = this.rdramRead8(addresses.INV_POWER) != 0x00;
+        if(thing != (this.hasPower ? 1 : 0))
+            changed = true;
+
+        thing = this.hasRaft ? 1 : 0;
         this.hasRaft = this.rdramRead8(addresses.INV_RAFT) != 0x00;
+        if(thing != (this.hasRaft ? 1 : 0))
+            changed = true;
+
+        thing = this.hasRod ? 1 : 0;
         this.hasRod = this.rdramRead8(addresses.INV_MAGICRD) != 0x00;
+        if(thing != (this.hasRod ? 1 : 0))
+            changed = true;
+
+        thing = this.hasWhistle ? 1 : 0;
         this.hasWhistle = this.rdramRead8(addresses.INV_WHISTLE) != 0x00;
+        if(thing != (this.hasWhistle ? 1 : 0))
+            changed = true;
 
         this.hearts = (this.rdramRead8(addresses.INV_HEARTS) | 0x0F) >> 4;
         this.keys = this.rdramRead8(addresses.INV_KEYS);
@@ -131,6 +212,7 @@ export class Inventory extends JSONTemplate implements IInventory
                 this.tunicCol = TunicCol.Red;
             break;
         }
+        return changed;
     }
     rewriteValues(): void {
         this.rdramWrite8(addresses.INV_ARROW, this.arrow);
@@ -138,7 +220,7 @@ export class Inventory extends JSONTemplate implements IInventory
         this.rdramWrite8(addresses.INV_BOMBS, this.bombs);
         this.rdramWrite8(addresses.INV_CANDLE, this.candle);
         this.rdramWrite8(addresses.INV_COMPASS, this.compass);
-        this.rdramWrite8(addresses.INV_HEARTS, (this.containers << 4) + this.hearts);
+        this.rdramWrite8(addresses.INV_HEARTS, (this.containers >> 4) + this.hearts);
 
         this.rdramWrite8(addresses.INV_MGCBOOK, this.hasBook ? 1 : 0);
         this.rdramWrite8(addresses.INV_BOOM, this.hasBoom ? 1 : 0);

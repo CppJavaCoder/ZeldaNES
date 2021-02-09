@@ -63,12 +63,12 @@ export class ZeldaNES implements ICore, API.ZeldaCore {
 
     @onTick()
     onTick() {
-        this.log.info("onTick");
+        //this.log.info("onTick");
         this.link.update();
     }
     
     @onPostTick()
     onPostTick() {
-        this.log.info("onPostTick");
+        //this.log.info("onPostTick");
     }
 }

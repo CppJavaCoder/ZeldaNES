@@ -2,7 +2,7 @@ import IMemory from 'modloader64_api/IMemory';
 import { JSONTemplate } from 'modloader64_api/JSONTemplate';
 import * as CORE from './Imports';
 import * as API from '../API/Imports';
-import { addresses } from '../API/ILink';
+import { addresses, GameMode } from '../API/ILink';
 import { Sprite } from './Sprite';
 import { bus } from 'modloader64_api/EventHandler';
 import { timeStamp } from 'console';
@@ -36,7 +36,7 @@ export class Link extends JSONTemplate implements API.ILink {
     constructor(emulator: IMemory) {
         super();
         this.emulator = emulator
-        this.sprite = new CORE.Sprite("mods/Link.bmp",16,16,4,4);
+        this.sprite = new CORE.Sprite("mods/Link.bmp",16,16,4,8);
         this.sprite.showSprite(true);
         this.xpos = 0xFF;
         this.ypos = 0xFF;
@@ -77,10 +77,13 @@ export class Link extends JSONTemplate implements API.ILink {
             this.sprite.showSprite(false);
             return;
         }
-        this.inventory.refreshValues();
         this.tunicUpdate();
 
-        this.frameUpdate();
+        if(this.frameUpdate())
+            if(this.inventory.refreshValues())
+            {
+                //Inventory updated
+            }
 
         this.updatedVisibility = this.visibleUpdate();
 
@@ -93,9 +96,19 @@ export class Link extends JSONTemplate implements API.ILink {
         this.clearPositionData();
     }
 
+    tunicColFromRing(val: number): number {
+        if(val == 0)
+            return API.TunicCol.Green;
+        else if(val == 2)
+            return API.TunicCol.Red;
+        else if(val == 1)
+            return API.TunicCol.Blue;
+        return API.TunicCol.Green;
+    }
+
     tunicUpdate(): boolean {
         let oldTC = this.tunicCol;
-        this.tunicCol = this.rdramRead8(addresses.TUNIC_COL);
+        this.tunicCol = this.tunicColFromRing(this.rdramRead8(addresses.INV_MGCRING));
         let bTime: number = this.blinker;
         this.blinker = this.rdramRead8(addresses.BLINKTIMER);
         if(this.rdramRead8(addresses.DEATHTIMER) >= 0x7B)
@@ -114,15 +127,15 @@ export class Link extends JSONTemplate implements API.ILink {
             this.sprite.replaceColor(0,0,0,0,0,0);
             if(this.tunicCol == API.TunicCol.Blue)
             {
-                this.sprite.replaceColor(56,224,128,128,56,244);
                 this.tunicColor = API.TunicColors.Blue;
+                this.sprite.replaceColor(56,224,128,128,56,244);
             }
             else if(this.tunicCol == API.TunicCol.Red)
             {
-                this.sprite.replaceColor(56,224,128,244,56,128);
                 this.tunicColor = API.TunicColors.Red;
+                this.sprite.replaceColor(56,224,128,244,56,128);
             }
-            else
+            else if(this.tunicCol == API.TunicCol.Green)
             {
                 this.tunicColor = API.TunicColors.Green;
                 this.sprite.replaceColor(56,224,128,56,224,128);
@@ -171,7 +184,11 @@ export class Link extends JSONTemplate implements API.ILink {
             this.fixedClip = true;
 
         if(this.fixedClip && this.rdramRead8(addresses.HEARTS) != 0)
-            this.yclip = (this.setypos - this.ypos)+1;
+        {
+            this.yclip = (this.setypos - this.ypos)+3;
+            if(this.yclip > 0)
+                this.yclip = 0;
+        }
         else
             this.yclip = 0;
 
@@ -218,7 +235,10 @@ export class Link extends JSONTemplate implements API.ILink {
 
     visibleUpdate(): boolean {
         let altered: boolean = this.sprite.isShown();
-        if(this.rdramRead8(addresses.ISDRAWING) > 0x00)
+        if(this.rdramRead8(addresses.ISDRAWING) > 0x00 && this.rdramRead8(0xE1) == 0 && this.rdramRead8(addresses.DEATHTIMER) != 0x7E && 
+        this.state != API.GameMode.Elimination && this.state != API.GameMode.FileSelect &&
+        this.state != API.GameMode.NameWriting && this.state != API.GameMode.StartScreen &&
+        this.state != API.GameMode.Loading && this.state != API.GameMode.GameOver)
         {
             if(altered != true)
             {
@@ -241,7 +261,9 @@ export class Link extends JSONTemplate implements API.ILink {
         if(this.rdramRead8(addresses.LINK_FRAME) == 0xFF)
             return false;
         this.frame = this.rdramRead8(addresses.LINK_FRAME);
+        let otherFrame: number = this.rdramRead8(addresses.LINK_FRAME+4);
         let sprFrame: number = 0;
+        let hasShield: boolean = this.inventory.hasMagicShield;
         switch(this.frame)
         {
             default:
@@ -256,37 +278,45 @@ export class Link extends JSONTemplate implements API.ILink {
                 sprFrame = 11;
             break;
             case 0x0C://Step 1 North
-                sprFrame = 1;
+                sprFrame = 1 + (hasShield ? 16 : 0);
             break;
             case 0x0D://Step 2 North
-                sprFrame = 0;
+                sprFrame = 0 + (hasShield ? 16 : 0);
             break;
             case 0x18://Attack North
                 sprFrame = 2;
             break;
             case 0x00://Step 1 East
-                sprFrame = 5;
+                sprFrame = 5 + (hasShield ? 16 : 0);
             break;
             case 0x04://Step 2 East
-                sprFrame = 4;
+                sprFrame = 4 + (hasShield ? 16 : 0);
             break;
             case 0x10://Attack East
                 sprFrame = 6;
             break;
             case 0x58://Step 1 South
-                sprFrame = 9;
+                sprFrame = 9 + (hasShield ? 16 : 0);
             break;
             case 0x5A://Step 2 South
-                sprFrame = 8;
+                sprFrame = 8 + (hasShield ? 16 : 0);
+            break;
+            case 0x60:
+                if(otherFrame == 0x0A)
+                    sprFrame = 9 + (hasShield ? 16 : 0);
+                if(otherFrame == 0x08)
+                    sprFrame = 8 + (hasShield ? 16 : 0);
             break;
             case 0x14://Attack West
                 sprFrame = 10;
             break;
             case 0x02://Step 1 West
-                sprFrame = 13;
+            case 0x54:
+                sprFrame = 13 + (hasShield ? 16 : 0);
             break;
             case 0x06://Step 2 West
-                sprFrame = 12;
+            case 0x80:
+                sprFrame = 12 + (hasShield ? 16 : 0);
             break;
             case 0x12://Attack South
                 sprFrame = 14;

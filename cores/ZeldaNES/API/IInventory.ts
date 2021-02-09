@@ -57,6 +57,6 @@ export interface IInventory extends ILink
     hasMagicShield: boolean;
     bombBag: number;
 
-    refreshValues(): void;
+    refreshValues(): boolean;
     rewriteValues(): void;
 }

@@ -4,6 +4,17 @@ import * as CORE from '../src/Imports';
 import * as API from '../API/Imports';
 import { IInventory } from './IInventory';
 
+export enum GameMode
+{
+    StartScreen = 0x00,
+    FileSelect  = 0x01,
+    Loading     = 0x03,
+    Playing     = 0x05,
+    GameOver    = 0x08,
+    NameWriting = 0x0E,
+    Elimination = 0x0F
+}
+
 export enum addresses
 {
     GAMEMODE    = 0x0012,
@@ -19,7 +30,7 @@ export enum addresses
     UNIVERSALT  = 0x0015,// Timer for various functions, probably break as soon as you touch it 
     TUNIC_COL   = 0x6804,// 0x29 = green, 0x32 = blue, 0x16 = red
     HEARTS      = 0x0670,
-    DEATHTIMER  = 0x0618,// >= 0x7B Link uses a grey palette
+    DEATHTIMER  = 0x0618,// >= 0x7B Link uses a grey palette 7E is don't draw link
     WORLD_POS   = 0x00EB,// 0x$% where $ is the Y and % is the X
     //These are pretty self explanitory, but might as well write out the details
     INV_SWORD   = 0x0657,// 0x00 = None, 0x01 = Normal, 0x02 = White, 0x03 = Magical sword 
