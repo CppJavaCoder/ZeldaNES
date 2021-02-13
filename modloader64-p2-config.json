@@ -2,7 +2,7 @@
   "ModLoader64": {
     "rom": "Zelda.nes",
     "patch": "",
-    "isServer": true,
+    "isServer": false,
     "isClient": true,
     "supportedConsoles": [
       "N64",

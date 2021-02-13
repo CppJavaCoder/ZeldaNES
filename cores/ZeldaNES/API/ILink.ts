@@ -2,7 +2,6 @@ import { ISprite } from './ISprite';
 import IMemory from 'modloader64_api/IMemory';
 import * as CORE from '../src/Imports';
 import * as API from '../API/Imports';
-import { IInventory } from './IInventory';
 
 export enum GameMode
 {
@@ -15,6 +14,15 @@ export enum GameMode
     Elimination = 0x0F
 }
 
+export enum Direction
+{
+    None = 0, // ???
+    Right = 1,
+    Left  = 2,
+    Down  = 4,
+    Up    = 8
+}
+
 export enum addresses
 {
     GAMEMODE    = 0x0012,
@@ -25,6 +33,8 @@ export enum addresses
     LINK_FRAME  = 0x0249,
     LINK_X      = 0x0070,// Character's XPOS
     LINK_Y      = 0x0084,// Character's YPOS
+    LINK_DIR    = 0x0098,// Character's Direction 01 for right 02 for left 04 for down 08 for up
+    WALK_ANIM   = 0x03D0,// counts up to 6 
     ISDRAWING   = 0x00FE,// Is the game drawing?
     BLINKTIMER  = 0x04F0,// If zero, green tunic, else based off of (universalt-1)/2 == (0 black red) (1 red white) (2 blue white)
     UNIVERSALT  = 0x0015,// Timer for various functions, probably break as soon as you touch it 
@@ -32,6 +42,15 @@ export enum addresses
     HEARTS      = 0x0670,
     DEATHTIMER  = 0x0618,// >= 0x7B Link uses a grey palette 7E is don't draw link
     WORLD_POS   = 0x00EB,// 0x$% where $ is the Y and % is the X
+    SCROLL_DIR  = 0x00E7,// 01 for right 02 for left 04 for down 08 for up
+    ENEMY_ALIVE = 0x0350,// Set to 0 to kill enemy 350 = enemy 1 351 = enemy 2 etc...
+    ENEMY_HP    = 0x0486,// Enemy life, can't kill enemy by setting to 0. 486 = enemy 1 487 = enemy 2 etc...
+    ROOM_PUZZLE = 0x00EE,// Todo Figure this out exactly, (only works in the underworld AFAIK)
+    ITEM_TIMER  = 0x03AA,// Timer until item despawns
+    ENEMY_DROP  = 0x00AD,// What the enemy has dropped
+    ENEMY_STATE = 0x0406,// 1-3 for cloud 0 for normal
+    SOLVEDROOMS = 0x06FF,// Saves what was obtained in the dungeon
+
     //These are pretty self explanitory, but might as well write out the details
     INV_SWORD   = 0x0657,// 0x00 = None, 0x01 = Normal, 0x02 = White, 0x03 = Magical sword 
     INV_BOMBS   = 0x0658,// Number of bombs
@@ -75,9 +94,23 @@ export enum TunicColors
 
 export interface ILink extends IMemory {
     sprite: API.ISprite;
-    inventory: IInventory;
+    inventory: API.IInventory;
+
+    wasTunicChanged: boolean;
+    wasPosChanged: boolean;
+    wasFrameChanged: boolean;
+    wasInventoryChanged: boolean;
+    wasClipChanged: boolean;
+    wasShownChanged: boolean;
+    wasWorldPosChange: boolean; 
+    scrollDirection: number; // 01 for right 02 for left 04 for down 08 for up
+
     getWorldPos(): number;
     getInOverworld(): boolean;
     getTunicColor(): TunicColors;
     update(): void;
+    rewriteInventory(): void;
+    move(x: number, y: number): void;
+    setPos(x: number, y: number): void;
+    getCurrentLevel(): number;
 }

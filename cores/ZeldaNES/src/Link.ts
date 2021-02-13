@@ -2,15 +2,17 @@ import IMemory from 'modloader64_api/IMemory';
 import { JSONTemplate } from 'modloader64_api/JSONTemplate';
 import * as CORE from './Imports';
 import * as API from '../API/Imports';
-import { addresses, GameMode } from '../API/ILink';
-import { Sprite } from './Sprite';
+import { addresses, Direction, GameMode } from '../API/ILink';
 import { bus } from 'modloader64_api/EventHandler';
 import { timeStamp } from 'console';
-import { Inventory } from './Inventory';
+import { timingSafeEqual } from 'crypto';
+import { Dir } from 'fs';
 
 export class Link extends JSONTemplate implements API.ILink {
     private readonly emulator: IMemory;
     sprite: API.ISprite;
+
+    jsonFields: string[] = ['x', 'y'];
 
     xpos: number;
     ypos: number;
@@ -22,7 +24,7 @@ export class Link extends JSONTemplate implements API.ILink {
     tunicCol: number;
 
     fixedClip: boolean;
-    updatedVisibility: boolean;
+    wasShownChanged: boolean;
 
     inventory: API.IInventory;
 
@@ -32,6 +34,14 @@ export class Link extends JSONTemplate implements API.ILink {
     worldPos: number;
 
     tunicColor: API.TunicColors;
+
+    wasTunicChanged: boolean;
+    wasPosChanged: boolean;
+    wasFrameChanged: boolean;
+    wasInventoryChanged: boolean;
+    wasClipChanged: boolean;
+    wasWorldPosChange: boolean;
+    scrollDirection: number;
 
     constructor(emulator: IMemory) {
         super();
@@ -47,14 +57,21 @@ export class Link extends JSONTemplate implements API.ILink {
         this.frame = 0;
         this.fixedClip = false;
         this.setypos = 0;
-        this.updatedVisibility = false;
+        this.wasShownChanged = false;
         this.tunicCol = API.TunicCol.Green;
-        this.inventory = new CORE.Inventory(emulator,this);
+        this.inventory = new CORE.Inventory();
         this.blinker = 0;
         this.state = 0;
         this.stateChanged = false;
         this.worldPos = 0;
         this.tunicColor = API.TunicColors.Green;
+        this.wasTunicChanged = false;
+        this.wasPosChanged = false;
+        this.wasFrameChanged = false;
+        this.wasInventoryChanged = false;
+        this.wasClipChanged = false;
+        this.wasWorldPosChange = false;
+        this.scrollDirection = 0;
     }
 
     getWorldPos(): number {
@@ -77,21 +94,32 @@ export class Link extends JSONTemplate implements API.ILink {
             this.sprite.showSprite(false);
             return;
         }
-        this.tunicUpdate();
+        this.wasTunicChanged = this.tunicUpdate();
+        this.wasFrameChanged = this.frameUpdate();
 
-        if(this.frameUpdate())
-            if(this.inventory.refreshValues())
+        this.wasShownChanged = this.visibleUpdate();
+        this.wasPosChanged = this.posUpdate();
+
+        let thing = this.scrollDirection;
+
+        this.scrollDirection = this.rdramRead8(addresses.SCROLL_DIR);
+        if(this.wasFrameChanged || this.wasPosChanged)
+        {
+            if(this.inventory.refreshValues(this.emulator))
             {
+                this.wasInventoryChanged = true;
                 //Inventory updated
             }
-
-        this.updatedVisibility = this.visibleUpdate();
-
-        if(this.posUpdate())
-        {
-            this.worldPos = this.rdramRead8(addresses.WORLD_POS);
         }
-        this.clipUpdate();
+
+        if(thing != this.scrollDirection && this.scrollDirection == Direction.None)
+        {
+            let tmp = this.worldPos;
+            this.worldPos = this.rdramRead8(addresses.WORLD_POS);
+            if(this.worldPos != tmp)
+                this.wasWorldPosChange = true;
+        }
+        this.wasClipChanged = this.clipUpdate();
         //Move link off of the screen so we can draw our own
         this.clearPositionData();
     }
@@ -104,6 +132,10 @@ export class Link extends JSONTemplate implements API.ILink {
         else if(val == 1)
             return API.TunicCol.Blue;
         return API.TunicCol.Green;
+    }
+
+    rewriteInventory(): void {
+        this.inventory.rewriteValues(this.emulator);
     }
 
     tunicUpdate(): boolean {
@@ -178,7 +210,7 @@ export class Link extends JSONTemplate implements API.ILink {
             this.setypos = this.ypos;
         }
 
-        if(this.rdramRead8(addresses.LINK_FRAME) == 0x78 || this.inOverworld || this.rdramRead8(addresses.INBASEMENT) == 0x40 || this.rdramRead8(addresses.INOVERWORLD) == 0x40)
+        if(this.rdramRead8(addresses.LINK_FRAME) == 0x78 || this.inOverworld || this.rdramRead8(addresses.INBASEMENT) != 0x00 || this.rdramRead8(addresses.INOVERWORLD) == 0x40)
             this.fixedClip = false;
         else
             this.fixedClip = true;
@@ -204,7 +236,7 @@ export class Link extends JSONTemplate implements API.ILink {
                 wclip = -(this.xpos - (256 - 32));
         }
         
-        if(oyclip != this.yclip || xclip != this.sprite.getClipX() || wclip != this.sprite.getClipW())
+        if(oyclip != this.yclip || xclip != this.sprite.clipX || wclip != this.sprite.clipW)
         {
             this.sprite.clip(xclip,0,wclip-xclip,this.yclip);
             return true;
@@ -215,7 +247,7 @@ export class Link extends JSONTemplate implements API.ILink {
 
     posUpdate(): boolean {
         if(this.rdramRead8(0x00248) == 0xFF)
-            return false;
+            return this.wasPosChanged;
         
         this.xpos = this.rdramRead8(addresses.LINK_X)
         this.ypos = this.rdramRead8(addresses.LINK_Y) - 8;
@@ -234,11 +266,12 @@ export class Link extends JSONTemplate implements API.ILink {
     }
 
     visibleUpdate(): boolean {
-        let altered: boolean = this.sprite.isShown();
+        let altered: boolean = this.sprite.shown;
         if(this.rdramRead8(addresses.ISDRAWING) > 0x00 && this.rdramRead8(0xE1) == 0 && this.rdramRead8(addresses.DEATHTIMER) != 0x7E && 
         this.state != API.GameMode.Elimination && this.state != API.GameMode.FileSelect &&
         this.state != API.GameMode.NameWriting && this.state != API.GameMode.StartScreen &&
-        this.state != API.GameMode.Loading && this.state != API.GameMode.GameOver)
+        this.state != API.GameMode.Loading && this.state != API.GameMode.GameOver && 
+        (this.scrollDirection == 0 || this.rdramRead8(addresses.INLEVEL) == 0))
         {
             if(altered != true)
             {
@@ -259,7 +292,7 @@ export class Link extends JSONTemplate implements API.ILink {
 
     frameUpdate(): boolean {
         if(this.rdramRead8(addresses.LINK_FRAME) == 0xFF)
-            return false;
+            return this.wasFrameChanged;
         this.frame = this.rdramRead8(addresses.LINK_FRAME);
         let otherFrame: number = this.rdramRead8(addresses.LINK_FRAME+4);
         let sprFrame: number = 0;
@@ -329,6 +362,36 @@ export class Link extends JSONTemplate implements API.ILink {
         }
 
         return false;
+    }
+
+    move(x: number, y: number): void
+    {
+        let trueX: number = this.xpos+x;
+        let trueY: number = this.ypos+y;
+
+        if(trueY < 0x3D-8)
+            trueY = 0x3D-8;
+        else if(trueY > 0xDD-8)
+            trueY = 0xDD-8;
+        if(trueX < 0x00)
+            trueX = 0x00;
+        else if(trueX > 0xF0)
+            trueX = 0xF0;
+        this.setPos(trueX,trueY);
+    }
+    setPos(x: number, y: number): void
+    {
+        let numb: number = 0x0394;
+        let dir: number = this.rdramRead8(addresses.LINK_DIR);
+        if(dir==API.Direction.Right||dir==API.Direction.Left)
+            this.rdramWrite8(numb,x%8);
+        else if(dir==API.Direction.Down||dir==API.Direction.Up)
+            this.rdramWrite8(numb,((y+8)%8)-5);
+        this.rdramWrite8(addresses.LINK_X,x);
+        this.rdramWrite8(addresses.LINK_Y,y+8);
+    }
+    getCurrentLevel(): number {
+        return this.rdramRead8(addresses.INLEVEL);
     }
 
     bitCount8(value: number): number {

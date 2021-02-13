@@ -1,6 +1,7 @@
 import ILink from 'modloader64_api/IMemory';
 import * as CORE from '../src/Imports';
 import * as API from '../API/Imports';
+import IMemory from 'modloader64_api/IMemory';
 
 export enum Upgrade2
 {
@@ -22,26 +23,26 @@ export enum TunicCol
     Red   = 0x16
 }
 
-export interface IInventory extends ILink
+export interface IInventory
 {
     tunicCol: TunicCol;
 
-    sword: Upgrade3;
+    sword: number; // Upgrade 3
     bombs:   number;
-    arrow: Upgrade2;
+    arrow: number; // Upgrade 2
     hasBow: boolean;
-    candle: Upgrade2;
+    candle: number; // Upgrade 2
     hasWhistle: boolean;
     hasFood: boolean;
-    potion: Upgrade2;
+    potion: number; // Upgrade 2
     hasRod: boolean;
     hasRaft: boolean;
     hasBook: boolean;
-    ring: Upgrade2;
+    ring: number; // Upgrade 2
     hasLadder: boolean;
     hasKey: boolean;
     hasPower: boolean;
-    letter: Upgrade2;
+    letter: number; // Upgrade 2
     compass: number;
     map: number;
     hasL9comp: boolean;
@@ -57,6 +58,6 @@ export interface IInventory extends ILink
     hasMagicShield: boolean;
     bombBag: number;
 
-    refreshValues(): boolean;
-    rewriteValues(): void;
+    refreshValues(emulator: IMemory): boolean;
+    rewriteValues(emulator: IMemory): void;
 }
